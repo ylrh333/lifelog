@@ -1,0 +1,8 @@
+{
+  "name": "LifeLog AI",
+  "description": "A minimalist, Apple-style life logger that uses AI to preserve and analyze your memories via text, voice, and video.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
