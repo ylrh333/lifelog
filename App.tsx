@@ -81,7 +81,7 @@ const SetupScreen = ({ onComplete, language }: { onComplete: () => void, languag
   );
 };
 
-// --- Auth Screen (Refactored) ---
+// --- Auth Screen ---
 const AuthScreen = ({ onLogin, language }: { onLogin: () => void, language: Language }) => {
   const t = TEXTS[language];
   
@@ -214,11 +214,13 @@ const AuthScreen = ({ onLogin, language }: { onLogin: () => void, language: Lang
                        </h3>
                        <button onClick={() => setShowHelp(false)}><ICONS.X size={20}/></button>
                    </div>
-                   <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                   <p className="text-sm text-gray-600 leading-relaxed mb-4 whitespace-pre-line">
                        {t.helpContent}
                    </p>
-                   <div className="bg-gray-100 p-3 rounded-lg text-xs font-mono text-gray-800 mb-4 break-all">
-                       {`{{ .ConfirmationURL }}  -->  {{ .Token }}`}
+                   <div className="bg-gray-100 p-3 rounded-lg text-xs font-mono text-gray-800 mb-4 overflow-x-auto">
+                       <pre>{`<h2>Verification Code</h2>
+<p>Your code is:</p>
+<h1>{{ .Token }}</h1>`}</pre>
                    </div>
                    <button onClick={() => setShowHelp(false)} className="w-full py-2 bg-gray-900 text-white rounded-lg text-sm font-bold">Got it</button>
                </div>
@@ -425,6 +427,8 @@ export default function App() {
   // Global State
   const [userConfigs, setUserConfigs] = useState<UserModelConfig[]>([]);
   const [language, setLanguage] = useState<Language>('zh'); // Default zh
+  const [activeModelId, setActiveModelId] = useState<string>('gemini-2.5-flash');
+
   const [profile, setProfile] = useState<UserProfile>({
     name: 'Traveler',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
@@ -531,12 +535,12 @@ export default function App() {
     if (!chatQuery.trim()) return;
     setIsChatting(true);
     try {
-      const response = await askLifeCoach(chatQuery, memories, userConfigs);
+      const response = await askLifeCoach(chatQuery, memories, userConfigs, activeModelId);
       setChatResponse(response);
       
       // Generate graph for context
       if (showGraph) {
-          const data = await generateGraphData(memories);
+          const data = await generateGraphData(memories, userConfigs, activeModelId);
           setGraphData(data);
       }
     } catch (e) {
@@ -704,6 +708,8 @@ export default function App() {
                   setUserConfigs([...userConfigs, cfg]);
               }
           }}
+          activeModelId={activeModelId}
+          onSetActiveModel={setActiveModelId}
           onLogout={() => {
               supabaseLogout();
               setView('auth');
@@ -727,7 +733,7 @@ export default function App() {
                     <ICONS.ChevronLeft size={24} />
                  </button>
              )}
-             {view === 'chat' ? t.chatMode : view === 'memory-detail' ? t.memoryDetail : 'Timeline'}
+             {view === 'chat' ? t.chatMode : view === 'memory-detail' ? t.memoryDetail : t.timelineTitle}
           </h1>
         </div>
         
@@ -773,6 +779,7 @@ export default function App() {
                   onAnalyzeUpdate={handleAnalyzeUpdate}
                   onDelete={handleDeleteMemory}
                   userConfigs={userConfigs}
+                  activeModelId={activeModelId}
                   language={language}
                 />
               ))
@@ -790,6 +797,7 @@ export default function App() {
                         onDelete={handleDeleteMemory}
                         highlight={true}
                         userConfigs={userConfigs}
+                        activeModelId={activeModelId}
                         language={language}
                     />
                 ))}

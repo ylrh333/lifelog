@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { ICONS, SUPPORTED_MODELS, TEXTS } from '../constants';
 import { UserProfile, UserModelConfig } from '../types';
@@ -7,6 +8,8 @@ interface SettingsProps {
   onUpdateProfile: (p: UserProfile) => void;
   userConfigs: UserModelConfig[];
   onUpdateConfig: (c: UserModelConfig) => void;
+  activeModelId: string;
+  onSetActiveModel: (id: string) => void;
   onLogout: () => void;
   onBack: () => void;
 }
@@ -16,6 +19,8 @@ export const SettingsScreen: React.FC<SettingsProps> = ({
   onUpdateProfile,
   userConfigs,
   onUpdateConfig,
+  activeModelId,
+  onSetActiveModel,
   onLogout,
   onBack
 }) => {
@@ -113,26 +118,42 @@ export const SettingsScreen: React.FC<SettingsProps> = ({
         <section>
            <div className="flex items-center justify-between mb-3 ml-1">
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.aiModels}</h3>
-                <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">AI Core</span>
+                <span className="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">Active: {SUPPORTED_MODELS.find(m => m.id === activeModelId)?.name}</span>
            </div>
            
            <div className="space-y-3">
               {SUPPORTED_MODELS.map(model => {
                  const config = userConfigs.find(c => c.modelId === model.id);
                  const hasKey = !!config?.apiKey || (model.provider === 'Google' && !!process.env.API_KEY);
+                 const isActive = activeModelId === model.id;
                  
                  return (
-                    <div key={model.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all hover:shadow-md">
+                    <div key={model.id} className={`bg-white rounded-2xl p-4 shadow-sm border transition-all hover:shadow-md ${isActive ? 'border-blue-500 ring-2 ring-blue-100' : 'border-gray-100'}`}>
                        <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-2">
                              <div className={`w-2 h-2 rounded-full ${hasKey ? 'bg-green-500' : 'bg-gray-300'}`} />
                              <span className="font-semibold text-sm">{model.name}</span>
                           </div>
-                          <div className="flex gap-1">
-                             {model.capabilities.includes('text') && <ICONS.Type size={12} className="text-gray-400" />}
-                             {model.capabilities.includes('image') && <ICONS.Image size={12} className="text-blue-400" />}
-                             {model.capabilities.includes('audio') && <ICONS.Speaker size={12} className="text-green-400" />}
-                             {model.capabilities.includes('video') && <ICONS.Eye size={12} className="text-purple-400" />}
+                          <div className="flex items-center gap-2">
+                             <div className="flex gap-1 mr-2">
+                                {model.capabilities.includes('text') && <ICONS.Type size={12} className="text-gray-400" />}
+                                {model.capabilities.includes('image') && <ICONS.Image size={12} className="text-blue-400" />}
+                                {model.capabilities.includes('audio') && <ICONS.Speaker size={12} className="text-green-400" />}
+                                {model.capabilities.includes('video') && <ICONS.Eye size={12} className="text-purple-400" />}
+                             </div>
+                             
+                             {isActive ? (
+                                <span className="text-[10px] bg-blue-600 text-white px-2 py-1 rounded-full font-bold flex items-center gap-1">
+                                    <ICONS.Check size={10} /> {t.currentActive}
+                                </span>
+                             ) : (
+                                <button 
+                                    onClick={() => onSetActiveModel(model.id)}
+                                    className="text-[10px] bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-bold hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                >
+                                    {t.setActive}
+                                </button>
+                             )}
                           </div>
                        </div>
                        <p className="text-[10px] text-gray-400 mb-3">{model.description}</p>

@@ -175,9 +175,10 @@ export const TEXTS = {
     step2: '邮箱验证',
     
     helpTitle: '如何获取数字验证码？',
-    helpContent: 'Supabase 默认发送链接。要发送6位数字，请去 Supabase 后台 > Authentication > Email Templates > Confirm Signup / Magic Link，将正文中的 {{ .ConfirmationURL }} 替换为 {{ .Token }}。',
+    helpContent: 'Supabase 默认发送链接。要发送6位数字，请去 Supabase 后台 > Authentication > Email Templates > Confirm Signup / Magic Link，将正文全部删除，替换为以下代码：\n\n<h2>验证码</h2>\n<p>您的 6 位数字验证码是：</p>\n<h1>{{ .Token }}</h1>',
     
     // App Text
+    timelineTitle: 'LifeLog',
     timelineEmpty: '记录第一条灵感...',
     composePlaceholder: '写下此时此刻的想法...',
     save: '保存',
@@ -205,7 +206,9 @@ export const TEXTS = {
     authModeOtp: '验证码登录',
     authModePwd: '密码登录',
     or: '或',
-    registerSuccess: '注册成功！已自动登录。'
+    registerSuccess: '注册成功！已自动登录。',
+    setActive: '设为默认',
+    currentActive: '当前使用',
   },
   en: {
     setupTitle: 'Connect Cloud',
@@ -246,8 +249,9 @@ export const TEXTS = {
     step2: 'Email Verification',
     
     helpTitle: 'How to get digits?',
-    helpContent: 'Go to Supabase Dashboard > Authentication > Email Templates. Replace {{ .ConfirmationURL }} with {{ .Token }} to receive 6-digit codes instead of links.',
+    helpContent: 'Go to Supabase Dashboard > Authentication > Email Templates > Confirm Signup / Magic Link. Delete the entire body and paste this:\n\n<h2>Verification Code</h2>\n<p>Your code is:</p>\n<h1>{{ .Token }}</h1>',
 
+    timelineTitle: 'LifeLog',
     timelineEmpty: 'Log your first inspiration...',
     composePlaceholder: 'What\'s on your mind?',
     save: 'Save',
@@ -275,6 +279,8 @@ export const TEXTS = {
     authModeOtp: 'Code Login',
     authModePwd: 'Password',
     or: 'or',
-    registerSuccess: 'Registered! You are logged in.'
+    registerSuccess: 'Registered! You are logged in.',
+    setActive: 'Set Default',
+    currentActive: 'Active',
   }
 };

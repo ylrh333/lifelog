@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Memory, MediaType, UserModelConfig, Language } from '../types';
 import { AudioPlayer } from './AudioPlayer';
@@ -10,6 +11,7 @@ interface MemoryCardProps {
   onDelete: (id: string) => void;
   highlight?: boolean;
   userConfigs: UserModelConfig[];
+  activeModelId: string;
   language: Language;
 }
 
@@ -19,6 +21,7 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
   onDelete, 
   highlight, 
   userConfigs,
+  activeModelId,
   language 
 }) => {
   const t = TEXTS[language];
@@ -39,12 +42,12 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     try {
-      const analysis = await analyzeMemory(memory, 'gemini-2.5-flash', userConfigs, language);
+      const analysis = await analyzeMemory(memory, activeModelId, userConfigs, language);
       onAnalyzeUpdate(memory.id, analysis);
       setEditedSummary(analysis.summary);
     } catch (error) {
       console.error("Analysis failed", error);
-      alert("Analysis failed.");
+      alert("Analysis failed. Check API Key.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -157,6 +160,9 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
                     #{tag}
                   </span>
                 ))}
+             </div>
+             <div className="mt-2 text-[10px] text-gray-300 text-right">
+                 Model: {memory.aiAnalysis.analyzedByModel || 'Gemini'}
              </div>
           </div>
         ) : (

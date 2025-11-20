@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { Memory, MediaType, AIAnalysis, GraphData, UserModelConfig, Language } from '../types';
 
@@ -121,9 +122,22 @@ export const analyzeMemory = async (
 };
 
 // --- Life Coach Chat ---
-export const askLifeCoach = async (query: string, memories: Memory[], userConfigs: UserModelConfig[]): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY }); 
-  const modelName = "gemini-2.5-flash";
+export const askLifeCoach = async (
+    query: string, 
+    memories: Memory[], 
+    userConfigs: UserModelConfig[],
+    targetModelId: string
+): Promise<string> => {
+  
+  const { type, client } = getAIClient(targetModelId, userConfigs);
+
+  if (type === 'other') {
+      // Simulation for non-Gemini models (since we don't have real backends for them in this demo)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return `[Simulation] (${targetModelId}) I am processing your request about "${query}". To enable real responses for this model, please integrate the provider's SDK.`;
+  }
+
+  const ai = (client as GoogleGenAI);
 
   const memoryContext = memories
     .filter(m => m.content || m.aiAnalysis)
@@ -144,7 +158,7 @@ export const askLifeCoach = async (query: string, memories: Memory[], userConfig
   `;
 
   const response = await ai.models.generateContent({
-    model: modelName,
+    model: targetModelId,
     contents: [{ role: 'user', parts: [{ text: query }] }],
     config: { systemInstruction: systemPrompt }
   });
@@ -153,10 +167,19 @@ export const askLifeCoach = async (query: string, memories: Memory[], userConfig
 };
 
 // --- Knowledge Graph Generator ---
-export const generateGraphData = async (memories: Memory[]): Promise<GraphData> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const modelName = "gemini-2.5-flash";
+export const generateGraphData = async (
+    memories: Memory[],
+    userConfigs: UserModelConfig[],
+    targetModelId: string
+): Promise<GraphData> => {
+  
+  const { type, client } = getAIClient(targetModelId, userConfigs);
 
+  if (type === 'other') {
+      return { nodes: [], links: [] };
+  }
+
+  const ai = (client as GoogleGenAI);
   const metadata = memories.map(m => ({
     id: m.id,
     summary: m.aiAnalysis?.summary || m.content || "Media",
@@ -172,7 +195,7 @@ export const generateGraphData = async (memories: Memory[]): Promise<GraphData> 
   `;
 
   const response = await ai.models.generateContent({
-    model: modelName,
+    model: targetModelId,
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     config: {
       responseMimeType: "application/json",
